@@ -22,6 +22,7 @@ from nametag_generator.web_content import SAMPLE_ROWS, UI_COPY, resolve_language
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SAMPLE_WORKBOOK = PROJECT_ROOT / "sample/attendees.sample.xlsx"
 SAMPLE_PDF = PROJECT_ROOT / "sample/badges.sample.pdf"
+FAVICON_ICO = PROJECT_ROOT / "ui/favicon.ico"
 MAX_ROLE_ROWS = 6
 MIN_ROLE_ROWS = 2
 
@@ -237,6 +238,7 @@ def _render_page(
   <head>
     <meta charset="utf-8" />
     <title>Nametag Generator</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <style>
       :root {{
         --bg: #efe7da;
@@ -915,7 +917,9 @@ def create_app() -> FastAPI:
 
     @app.get("/favicon.ico")
     async def favicon() -> Response:
-        return Response(status_code=204)
+        if not FAVICON_ICO.exists():
+            return Response(status_code=204)
+        return FileResponse(FAVICON_ICO, media_type="image/x-icon")
 
     @app.post("/preview")
     async def preview(request: Request) -> JSONResponse:

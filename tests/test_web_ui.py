@@ -26,6 +26,7 @@ def test_home_page_shows_schema_and_preview_help() -> None:
     assert "fetch('/preview'" in body
     assert 'href="/?lang=ko"' in body
     assert "Add role" in body
+    assert 'href="/favicon.ico"' in body
 
 
 def test_korean_language_toggle_renders_full_page_copy() -> None:
@@ -57,6 +58,14 @@ def test_sample_assets_are_downloadable() -> None:
         workbook_response.headers["content-type"]
         == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+
+def test_favicon_is_served() -> None:
+    client = TestClient(create_app())
+    response = client.get("/favicon.ico")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/x-icon"
+    assert len(response.content) > 0
 
 
 def test_preview_endpoint_returns_preview_data_url() -> None:
