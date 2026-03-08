@@ -1,0 +1,10 @@
+.DS_Store
+.pytest_cache/
+__pycache__/
+*.pyc
+.venv/
+.omx/
+tmp/
+output/
+AGENTS.md
+OpenAI Codex Meetup - Seoul.xlsx

@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nametag-generator"
+version = "0.1.0"
+description = "Generate print-ready A4 nametag PDFs from .xlsx input."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+  {name = "Seowoo Han"},
+]
+dependencies = [
+  "fastapi>=0.110",
+  "openpyxl>=3.1",
+  "pillow>=10.0",
+  "python-multipart>=0.0.9",
+  "reportlab>=4.0",
+  "typer>=0.12",
+  "uvicorn>=0.29",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.27",
+  "pypdf>=4.0",
+  "pytest>=8.0",
+]
+
+[project.scripts]
+nametag-generator = "nametag_generator.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/swhan0329/nametag-generator"
+Repository = "https://github.com/swhan0329/nametag-generator"
+Issues = "https://github.com/swhan0329/nametag-generator/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
