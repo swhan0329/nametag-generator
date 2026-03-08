@@ -2,6 +2,8 @@
 
 Open-source generator for print-ready A4 nametag PDFs from `.xlsx` input.
 
+Korean docs: [README.ko.md](README.ko.md)
+
 Release: `0.1.0`
 
 `Nametag Generator` is built for event operators who want a lightweight way to go from a spreadsheet to a physically accurate PDF without opening a design tool. It includes:
