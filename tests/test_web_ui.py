@@ -13,9 +13,20 @@ def test_home_page_shows_schema_and_preview_help() -> None:
     response = client.get("/")
     assert response.status_code == 200
     body = response.text
+    assert "<title>Nametag Generator | Create Print-Ready Event Name Tags from Excel</title>" in body
+    assert (
+        '<meta name="description" content="Generate print-ready event name tags from an Excel workbook, preview the first page in your browser, and export a PDF sized for real badge inserts." />'
+        in body
+    )
+    assert '<link rel="canonical" href="http://testserver/en"' in body
+    assert 'type="application/ld+json"' in body
+    assert "FAQPage" in body
+    assert "SoftwareApplication" in body
+    assert "How to make print-ready name tags" in body
+    assert "Create printable event name tags from Excel" in body
     assert "Sample workbook columns" in body
     assert "Role examples" in body
-    assert "Built for this insert size. Print at 100% and you are ready to go." in body
+    assert "Set to 93 × 122 mm by default, and easy to adjust. Print at 100% for a true-to-size fit." in body
     assert "/sample-workbook" in body
     assert "Role style settings" in body
     assert 'name="role_key"' in body
@@ -24,7 +35,7 @@ def test_home_page_shows_schema_and_preview_help() -> None:
     assert 'name="role_color"' in body
     assert "Preview in browser" in body
     assert "fetch('/preview'" in body
-    assert 'href="/?lang=ko"' in body
+    assert 'href="/ko"' in body
     assert "Add role" in body
     assert 'href="/favicon.ico"' in body
 
@@ -34,11 +45,15 @@ def test_korean_language_toggle_renders_full_page_copy() -> None:
     response = client.get("/?lang=ko")
     assert response.status_code == 200
     body = response.text
+    assert "<title>Nametag Generator | 엑셀로 출력용 행사 네임태그 PDF 만들기</title>" in body
+    assert '<link rel="canonical" href="http://testserver/ko"' in body
+    assert "자주 묻는 질문" in body
+    assert "출력용 네임태그 만드는 방법" in body
     assert "한 번에 맞는 네임태그를 바로 만드세요." in body
-    assert "이 규격에 맞춰 만들었습니다. 100% 실제 사이즈로 출력하면 바로 사용할 수 있습니다." in body
+    assert "기본값은 93 × 122 mm이며 필요하면 조정할 수 있습니다. 100% 실제 사이즈로 출력하면 바로 사용할 수 있습니다." in body
     assert "역할 바 설정" in body
     assert "브라우저에서 미리보기" in body
-    assert 'href="/?lang=en"' in body
+    assert 'href="/en"' in body
 
 
 def test_language_shortcuts_render_without_404() -> None:
@@ -66,6 +81,21 @@ def test_favicon_is_served() -> None:
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/x-icon"
     assert len(response.content) > 0
+
+
+def test_robots_txt_and_sitemap_are_served() -> None:
+    client = TestClient(create_app())
+
+    robots_response = client.get("/robots.txt")
+    assert robots_response.status_code == 200
+    assert robots_response.text == "User-agent: *\nAllow: /\nSitemap: http://testserver/sitemap.xml\n"
+
+    sitemap_response = client.get("/sitemap.xml")
+    assert sitemap_response.status_code == 200
+    assert sitemap_response.headers["content-type"].startswith("application/xml")
+    assert "<loc>http://testserver/en</loc>" in sitemap_response.text
+    assert "<loc>http://testserver/ko</loc>" in sitemap_response.text
+    assert 'hreflang="x-default"' in sitemap_response.text
 
 
 def test_preview_endpoint_returns_preview_data_url() -> None:

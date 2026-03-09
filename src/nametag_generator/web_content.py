@@ -13,6 +13,13 @@ SAMPLE_ROWS: tuple[tuple[str, str, str | None, str | None], ...] = (
 UI_COPY: dict[str, dict[str, Any]] = {
     "en": {
         "language_name": "English",
+        "meta_title": "Nametag Generator | Create Print-Ready Event Name Tags from Excel",
+        "meta_description": (
+            "Generate print-ready event name tags from an Excel workbook, preview the first page in your browser, "
+            "and export a PDF sized for real badge inserts."
+        ),
+        "meta_locale": "en_US",
+        "site_name": "Nametag Generator",
         "eyebrow": "Ready to print",
         "hero_title": "Make name tags that fit the first time.",
         "lead": (
@@ -22,7 +29,7 @@ UI_COPY: dict[str, dict[str, Any]] = {
         "stats": (
             {
                 "title": "93 × 122 mm",
-                "body": "Built for this insert size. Print at 100% and you are ready to go.",
+                "body": "Set to 93 × 122 mm by default, and easy to adjust. Print at 100% for a true-to-size fit.",
             },
             {
                 "title": "Preview before export",
@@ -94,6 +101,56 @@ UI_COPY: dict[str, dict[str, Any]] = {
             "Typical role values include ATTENDEE, HOST, SPEAKER, and STAFF.",
             "For the right physical size, print at 100% or Actual Size.",
         ),
+        "search_section_title": "Create printable event name tags from Excel",
+        "search_section_body": (
+            "This tool is built for event teams that need a fast path from a spreadsheet to a badge-sized PDF. "
+            "It keeps the input simple, preserves physical dimensions in millimeters, and lets you preview before exporting."
+        ),
+        "howto_title": "How to make print-ready name tags",
+        "howto_intro": (
+            "Use the web app when you want a simple browser workflow without editing templates in a design tool."
+        ),
+        "howto_steps": (
+            (
+                "Prepare an .xlsx workbook",
+                "Add the required columns `name` and `organization`, then add `role` or `title` only when you need them.",
+            ),
+            (
+                "Adjust badge size and role styles",
+                "Keep the default 93 × 122 mm size or enter a custom insert size, then edit role labels and colors if your event uses custom badge bars.",
+            ),
+            (
+                "Preview and export",
+                "Render the first page in your browser, verify the layout, and download the final PDF for printing at 100% or Actual Size.",
+            ),
+        ),
+        "faq_title": "FAQ",
+        "faq_intro": "These answers are written to help both visitors and search engines understand exactly what the app does.",
+        "faq_items": (
+            (
+                "What file format does Nametag Generator use?",
+                "Nametag Generator uses `.xlsx` Excel workbooks. The required columns are `name` and `organization`, while `role` and `title` are optional.",
+            ),
+            (
+                "Can I create event badges without a design tool?",
+                "Yes. The app turns spreadsheet data into a print-ready PDF, so event operators can create badges without opening layout software.",
+            ),
+            (
+                "Can I preview badges before downloading the PDF?",
+                "Yes. The web UI renders the first page in your browser so you can confirm names, spacing, and role bars before export.",
+            ),
+            (
+                "How do I print the badges at the correct size?",
+                "Export the PDF and print it at 100% or Actual Size. The default badge insert size is 93 × 122 mm, and you can change it if your inserts use another format.",
+            ),
+        ),
+        "feature_list": (
+            "Generate badge PDFs from `.xlsx` workbooks",
+            "Preview the first page in the browser before export",
+            "Customize role labels and colors",
+            "Set physical badge size in millimeters",
+            "Switch between English and Korean UI copy",
+        ),
         "sample_card_labels": {"host": "Host", "speaker": "Speaker", "plain": "No Role"},
         "preview_messages": {
             "choose_file": "Choose an .xlsx file first.",
@@ -104,6 +161,12 @@ UI_COPY: dict[str, dict[str, Any]] = {
     },
     "ko": {
         "language_name": "한국어",
+        "meta_title": "Nametag Generator | 엑셀로 출력용 행사 네임태그 PDF 만들기",
+        "meta_description": (
+            "엑셀 워크북으로 행사 네임태그를 만들고, 브라우저에서 첫 페이지를 미리 확인한 뒤 실제 배지 규격에 맞는 PDF로 바로 내보낼 수 있습니다."
+        ),
+        "meta_locale": "ko_KR",
+        "site_name": "Nametag Generator",
         "eyebrow": "바로 출력 가능한 네임태그",
         "hero_title": "한 번에 맞는 네임태그를 바로 만드세요.",
         "lead": (
@@ -113,7 +176,7 @@ UI_COPY: dict[str, dict[str, Any]] = {
         "stats": (
             {
                 "title": "93 × 122 mm",
-                "body": "이 규격에 맞춰 만들었습니다. 100% 실제 사이즈로 출력하면 바로 사용할 수 있습니다.",
+                "body": "기본값은 93 × 122 mm이며 필요하면 조정할 수 있습니다. 100% 실제 사이즈로 출력하면 바로 사용할 수 있습니다.",
             },
             {
                 "title": "미리보기 후 출력",
@@ -176,6 +239,54 @@ UI_COPY: dict[str, dict[str, Any]] = {
             "role 값이 비어 있거나 컬럼이 없으면 역할 바 없이 일반 이름표가 생성됩니다.",
             "주로 쓰는 역할 값은 ATTENDEE, HOST, SPEAKER, STAFF 입니다.",
             "실측을 맞추려면 100% 또는 Actual Size로 출력하세요.",
+        ),
+        "search_section_title": "엑셀에서 바로 출력 가능한 행사 네임태그 만들기",
+        "search_section_body": (
+            "이 도구는 행사 운영팀이 스프레드시트에서 배지용 PDF까지 빠르게 만들 수 있도록 설계되었습니다. "
+            "입력은 단순하게 유지하고, 실제 규격은 mm 단위로 맞추며, 내보내기 전에 브라우저 미리보기도 제공합니다."
+        ),
+        "howto_title": "출력용 네임태그 만드는 방법",
+        "howto_intro": "디자인 툴 없이 브라우저만으로 네임태그를 만들고 싶을 때 사용하는 흐름입니다.",
+        "howto_steps": (
+            (
+                ".xlsx 워크북 준비",
+                "필수 컬럼인 `name`, `organization`을 넣고, 필요할 때만 `role`, `title` 컬럼을 추가합니다.",
+            ),
+            (
+                "카드 크기와 역할 바 설정",
+                "기본 93 × 122 mm를 유지하거나 원하는 규격을 입력하고, 행사에 맞게 역할 라벨과 색상을 조정합니다.",
+            ),
+            (
+                "미리보기 후 PDF 생성",
+                "브라우저에서 첫 페이지를 확인한 뒤 최종 PDF를 내려받아 100% 또는 Actual Size로 출력합니다.",
+            ),
+        ),
+        "faq_title": "자주 묻는 질문",
+        "faq_intro": "방문자와 검색엔진이 이 앱의 용도를 바로 이해할 수 있도록 핵심 질문에 짧고 명확하게 답합니다.",
+        "faq_items": (
+            (
+                "Nametag Generator는 어떤 파일 형식을 사용하나요?",
+                "`.xlsx` 엑셀 워크북을 사용합니다. 필수 컬럼은 `name`, `organization`이며 `role`, `title`은 선택입니다.",
+            ),
+            (
+                "디자인 툴 없이 행사 이름표를 만들 수 있나요?",
+                "네. 스프레드시트 데이터를 바로 출력용 PDF로 바꿔 주기 때문에 별도의 레이아웃 툴 없이도 행사 배지를 만들 수 있습니다.",
+            ),
+            (
+                "PDF를 받기 전에 미리보기를 볼 수 있나요?",
+                "네. 웹 UI에서 첫 페이지를 브라우저로 렌더링해서 이름, 여백, 역할 바를 확인한 뒤 내보낼 수 있습니다.",
+            ),
+            (
+                "실제 크기에 맞게 출력하려면 어떻게 해야 하나요?",
+                "PDF를 생성한 뒤 프린터 설정에서 100% 또는 Actual Size로 출력하면 됩니다. 기본 카드 규격은 93 × 122 mm이며 필요하면 변경할 수 있습니다.",
+            ),
+        ),
+        "feature_list": (
+            "`.xlsx` 워크북으로 네임태그 PDF 생성",
+            "브라우저에서 첫 페이지 미리보기",
+            "역할 라벨과 색상 사용자 지정",
+            "mm 단위 실제 카드 규격 설정",
+            "영어와 한국어 UI 전환",
         ),
         "sample_card_labels": {"host": "호스트", "speaker": "연사", "plain": "일반"},
         "preview_messages": {

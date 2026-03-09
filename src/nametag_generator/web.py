@@ -23,6 +23,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SAMPLE_WORKBOOK = PROJECT_ROOT / "sample/attendees.sample.xlsx"
 SAMPLE_PDF = PROJECT_ROOT / "sample/badges.sample.pdf"
 FAVICON_ICO = PROJECT_ROOT / "ui/favicon.ico"
+FALLBACK_FAVICON_ICO = base64.b64decode(
+    "AAABAAEAEBAAAAAAIABdAAAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAQAAAAEAgGAAAAH/P/YQAAACRJREFUeJxjFIm8+Z+BAsBEieZRA0YNgAGWrUIBA+uCUQMYGAAhBQN+o9XGkAAAAABJRU5ErkJggg=="
+)
 MAX_ROLE_ROWS = 6
 MIN_ROLE_ROWS = 2
 
@@ -128,6 +131,30 @@ def _guide_items_html(copy: dict[str, Any]) -> str:
     return "".join(f"<li>{_escape(item)}</li>" for item in copy["guide_items"])
 
 
+def _howto_steps_html(copy: dict[str, Any]) -> str:
+    return "".join(
+        f"""
+        <li class="step-item">
+          <strong>{_escape(title)}</strong>
+          <p>{_escape(body)}</p>
+        </li>
+        """
+        for title, body in copy["howto_steps"]
+    )
+
+
+def _faq_items_html(copy: dict[str, Any]) -> str:
+    return "".join(
+        f"""
+        <article class="faq-item">
+          <h3>{_escape(question)}</h3>
+          <p>{_escape(answer)}</p>
+        </article>
+        """
+        for question, answer in copy["faq_items"]
+    )
+
+
 def _role_settings_html(copy: dict[str, Any], role_rows: list[dict[str, str]]) -> str:
     blocks: list[str] = []
     for index, row in enumerate(role_rows):
@@ -200,9 +227,87 @@ def _sample_cards_html(copy: dict[str, Any], role_rows: list[dict[str, str]]) ->
 
 def _language_toggle_html(language: str) -> str:
     return "".join(
-        f'<a class="{"lang-link active" if code == language else "lang-link"}" href="/?lang={code}">{_escape(UI_COPY[language]["language_toggle"][code])}</a>'
+        f'<a class="{"lang-link active" if code == language else "lang-link"}" href="/{code}">{_escape(UI_COPY[language]["language_toggle"][code])}</a>'
         for code in ("en", "ko")
     )
+
+
+def _absolute_url(base_url: str, path: str) -> str:
+    return f"{base_url.rstrip('/')}{path}"
+
+
+def _structured_data_json(
+    *,
+    copy: dict[str, Any],
+    language: str,
+    canonical_url: str,
+) -> str:
+    data = [
+        {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": copy["site_name"],
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "url": canonical_url,
+            "inLanguage": language,
+            "description": copy["meta_description"],
+            "featureList": list(copy["feature_list"]),
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "HowTo",
+            "name": copy["howto_title"],
+            "description": copy["howto_intro"],
+            "inLanguage": language,
+            "step": [
+                {
+                    "@type": "HowToStep",
+                    "name": title,
+                    "text": body,
+                }
+                for title, body in copy["howto_steps"]
+            ],
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "inLanguage": language,
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": question,
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": answer,
+                    },
+                }
+                for question, answer in copy["faq_items"]
+            ],
+        },
+    ]
+    return json.dumps(data, ensure_ascii=False)
+
+
+def _sitemap_xml(base_url: str) -> str:
+    english_url = _absolute_url(base_url, "/en")
+    korean_url = _absolute_url(base_url, "/ko")
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>{_escape(english_url)}</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="{_escape(english_url)}" />
+    <xhtml:link rel="alternate" hreflang="ko" href="{_escape(korean_url)}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="{_escape(english_url)}" />
+  </url>
+  <url>
+    <loc>{_escape(korean_url)}</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="{_escape(english_url)}" />
+    <xhtml:link rel="alternate" hreflang="ko" href="{_escape(korean_url)}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="{_escape(english_url)}" />
+  </url>
+</urlset>
+"""
 
 
 def _parse_role_rows_from_form(form: Any) -> list[dict[str, str]]:
@@ -222,23 +327,51 @@ def _parse_role_rows_from_form(form: Any) -> list[dict[str, str]]:
 def _render_page(
     *,
     language: str,
+    base_url: str,
+    canonical_path: str,
     error: str | None = None,
     role_rows: list[dict[str, str]] | None = None,
 ) -> str:
-    copy = UI_COPY[resolve_language(language)]
+    resolved_language = resolve_language(language)
+    copy = UI_COPY[resolved_language]
     normalized_role_rows = _normalize_role_rows(role_rows)
     preview_messages = json.dumps(copy["preview_messages"], ensure_ascii=False)
     initial_role_rows = json.dumps(normalized_role_rows, ensure_ascii=False)
     sample_people = json.dumps(SAMPLE_ROWS, ensure_ascii=False)
+    canonical_url = _absolute_url(base_url, canonical_path)
+    english_url = _absolute_url(base_url, "/en")
+    korean_url = _absolute_url(base_url, "/ko")
+    structured_data = _structured_data_json(
+        copy=copy,
+        language=resolved_language,
+        canonical_url=canonical_url,
+    )
     message_html = (
         f"<div class='flash flash-error'>{_escape(error)}</div>" if error else ""
     )
     return f"""<!doctype html>
-<html lang="{_escape(language)}">
+<html lang="{_escape(resolved_language)}">
   <head>
     <meta charset="utf-8" />
-    <title>Nametag Generator</title>
+    <title>{_escape(copy["meta_title"])}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="{_escape(copy["meta_description"])}" />
+    <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+    <link rel="canonical" href="{_escape(canonical_url)}" />
+    <link rel="alternate" hreflang="en" href="{_escape(english_url)}" />
+    <link rel="alternate" hreflang="ko" href="{_escape(korean_url)}" />
+    <link rel="alternate" hreflang="x-default" href="{_escape(english_url)}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{_escape(copy["site_name"])}" />
+    <meta property="og:title" content="{_escape(copy["meta_title"])}" />
+    <meta property="og:description" content="{_escape(copy["meta_description"])}" />
+    <meta property="og:url" content="{_escape(canonical_url)}" />
+    <meta property="og:locale" content="{_escape(copy["meta_locale"])}" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="{_escape(copy["meta_title"])}" />
+    <meta name="twitter:description" content="{_escape(copy["meta_description"])}" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
+    <script type="application/ld+json">{structured_data}</script>
     <style>
       :root {{
         --bg: #efe7da;
@@ -627,6 +760,57 @@ def _render_page(
         .workspace, .sidebar {{ padding: 20px; }}
         .stats, .grid, .split {{ grid-template-columns: 1fr; }}
       }}
+      .knowledge-grid {{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+      }}
+      .knowledge-panel {{
+        padding: 24px;
+      }}
+      .knowledge-panel h2 {{
+        margin: 0 0 10px;
+        font-size: 24px;
+      }}
+      .knowledge-panel p {{
+        margin: 0;
+        color: var(--muted);
+      }}
+      .step-list {{
+        margin: 18px 0 0;
+        padding-left: 20px;
+      }}
+      .step-item + .step-item {{
+        margin-top: 14px;
+      }}
+      .step-item strong {{
+        display: block;
+        margin-bottom: 6px;
+      }}
+      .step-item p {{
+        margin: 0;
+      }}
+      .faq-list {{
+        display: grid;
+        gap: 16px;
+        margin-top: 18px;
+      }}
+      .faq-item {{
+        padding: 16px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.6);
+      }}
+      .faq-item h3 {{
+        margin: 0 0 8px;
+        font-size: 18px;
+      }}
+      .faq-item p {{
+        margin: 0;
+      }}
+      @media (max-width: 1020px) {{
+        .knowledge-grid {{ grid-template-columns: 1fr; }}
+      }}
     </style>
   </head>
   <body>
@@ -721,6 +905,22 @@ def _render_page(
           </section>
         </aside>
       </div>
+      <section class="knowledge-grid" aria-label="Search and answer content">
+        <section class="panel knowledge-panel">
+          <h2>{_escape(copy["search_section_title"])}</h2>
+          <p>{_escape(copy["search_section_body"])}</p>
+          <div class="help" style="margin-top:18px;">
+            <h2>{_escape(copy["howto_title"])}</h2>
+            <p>{_escape(copy["howto_intro"])}</p>
+            <ol class="step-list">{_howto_steps_html(copy)}</ol>
+          </div>
+        </section>
+        <section class="panel knowledge-panel">
+          <h2>{_escape(copy["faq_title"])}</h2>
+          <p>{_escape(copy["faq_intro"])}</p>
+          <div class="faq-list">{_faq_items_html(copy)}</div>
+        </section>
+      </section>
     </main>
     <script>
       const uiText = {preview_messages};
@@ -889,15 +1089,42 @@ def create_app() -> FastAPI:
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request) -> str:
         language = resolve_language(request.query_params.get("lang"))
-        return _render_page(language=language)
+        return _render_page(
+            language=language,
+            base_url=str(request.base_url).rstrip("/"),
+            canonical_path=f"/{language}",
+        )
 
     @app.get("/en", response_class=HTMLResponse)
-    async def english_page() -> str:
-        return _render_page(language="en")
+    async def english_page(request: Request) -> str:
+        return _render_page(
+            language="en",
+            base_url=str(request.base_url).rstrip("/"),
+            canonical_path="/en",
+        )
 
     @app.get("/ko", response_class=HTMLResponse)
-    async def korean_page() -> str:
-        return _render_page(language="ko")
+    async def korean_page(request: Request) -> str:
+        return _render_page(
+            language="ko",
+            base_url=str(request.base_url).rstrip("/"),
+            canonical_path="/ko",
+        )
+
+    @app.get("/robots.txt")
+    async def robots(request: Request) -> Response:
+        base_url = str(request.base_url).rstrip("/")
+        return Response(
+            content=f"User-agent: *\nAllow: /\nSitemap: {base_url}/sitemap.xml\n",
+            media_type="text/plain",
+        )
+
+    @app.get("/sitemap.xml")
+    async def sitemap(request: Request) -> Response:
+        return Response(
+            content=_sitemap_xml(str(request.base_url).rstrip("/")),
+            media_type="application/xml",
+        )
 
     @app.get("/sample-workbook")
     async def sample_workbook() -> FileResponse:
@@ -918,7 +1145,7 @@ def create_app() -> FastAPI:
     @app.get("/favicon.ico")
     async def favicon() -> Response:
         if not FAVICON_ICO.exists():
-            return Response(status_code=204)
+            return Response(content=FALLBACK_FAVICON_ICO, media_type="image/x-icon")
         return FileResponse(FAVICON_ICO, media_type="image/x-icon")
 
     @app.post("/preview")
@@ -977,6 +1204,8 @@ def create_app() -> FastAPI:
                 return HTMLResponse(
                     _render_page(
                         language=language,
+                        base_url=str(request.base_url).rstrip("/"),
+                        canonical_path=f"/{language}",
                         error=str(exc),
                         role_rows=role_rows,
                     ),
