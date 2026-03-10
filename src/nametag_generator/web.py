@@ -155,6 +155,18 @@ def _faq_items_html(copy: dict[str, Any]) -> str:
     )
 
 
+def _quick_notes_html(copy: dict[str, Any]) -> str:
+    return "".join(
+        f"""
+        <article class="note-card">
+          <strong>{_escape(title)}</strong>
+          <p>{_escape(body)}</p>
+        </article>
+        """
+        for title, body in copy["quick_notes"]
+    )
+
+
 def _role_settings_html(copy: dict[str, Any], role_rows: list[dict[str, str]]) -> str:
     blocks: list[str] = []
     for index, row in enumerate(role_rows):
@@ -374,47 +386,89 @@ def _render_page(
     <script type="application/ld+json">{structured_data}</script>
     <style>
       :root {{
-        --bg: #efe7da;
-        --panel: #fffaf2;
-        --panel-strong: #f6eee1;
-        --ink: #1d1b18;
-        --muted: #6a6258;
-        --line: #d9ccbb;
-        --accent: #1459d9;
-        --accent-soft: rgba(20, 89, 217, 0.10);
-        --warm: #c96b29;
-        --shadow: 0 24px 70px rgba(0, 0, 0, 0.10);
+        --bg: #eef1f5;
+        --bg-accent: #f7f2e9;
+        --panel: rgba(252, 248, 241, 0.92);
+        --panel-strong: #ffffff;
+        --panel-muted: #f4ede2;
+        --ink: #1a1d25;
+        --muted: #5d6573;
+        --line: rgba(26, 29, 37, 0.12);
+        --accent: #2057d6;
+        --accent-strong: #13307f;
+        --accent-soft: rgba(32, 87, 214, 0.12);
+        --accent-grid: rgba(32, 87, 214, 0.08);
+        --warm: #a85c31;
+        --shadow: 0 30px 80px rgba(25, 32, 54, 0.12);
+        --radius-xl: 30px;
+        --radius-lg: 22px;
+        --radius-md: 18px;
       }}
       * {{ box-sizing: border-box; }}
       body {{
         margin: 0;
-        font-family: "Avenir Next", "Helvetica Neue", "Pretendard", sans-serif;
+        font-family: "Avenir Next", "SUIT", "Pretendard", "Helvetica Neue", sans-serif;
         background:
-          radial-gradient(circle at top left, rgba(20, 89, 217, 0.10), transparent 24%),
-          radial-gradient(circle at top right, rgba(201, 107, 41, 0.12), transparent 20%),
-          linear-gradient(180deg, var(--bg), #e8dece);
+          radial-gradient(circle at top left, rgba(32, 87, 214, 0.12), transparent 26%),
+          radial-gradient(circle at top right, rgba(168, 92, 49, 0.10), transparent 22%),
+          linear-gradient(180deg, var(--bg), var(--bg-accent));
         color: var(--ink);
       }}
       main {{
-        max-width: 1240px;
+        max-width: 1300px;
         margin: 0 auto;
-        padding: 28px 20px 40px;
+        padding: 26px 20px 48px;
       }}
-      .topbar {{
+      .masthead {{
         display: flex;
-        justify-content: flex-end;
-        margin-bottom: 14px;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 20px;
+      }}
+      .brand-lockup {{
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+      }}
+      .brand-mark {{
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: white;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        box-shadow: 0 18px 30px rgba(32, 87, 214, 0.22);
+      }}
+      .brand-copy {{
+        display: grid;
+        gap: 2px;
+      }}
+      .brand-copy strong {{
+        font-size: 15px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }}
+      .brand-copy span {{
+        color: var(--muted);
+        font-size: 13px;
       }}
       .lang-switch {{
         display: inline-flex;
         gap: 6px;
         padding: 6px;
+        border-radius: 999px;
         border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.72);
+        background: rgba(255, 255, 255, 0.82);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       }}
       .lang-link {{
-        padding: 8px 12px;
+        padding: 9px 14px;
+        border-radius: 999px;
         color: var(--muted);
         text-decoration: none;
         font-size: 13px;
@@ -426,28 +480,66 @@ def _render_page(
         background: var(--ink);
         color: white;
       }}
+      .hero-shell {{
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+        gap: 24px;
+        margin-bottom: 24px;
+      }}
       .shell {{
         display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+        grid-template-columns: minmax(0, 1.04fr) minmax(300px, 0.96fr);
         gap: 24px;
         align-items: start;
       }}
       .panel {{
-        background: color-mix(in srgb, var(--panel) 88%, white);
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, var(--panel), rgba(255, 255, 255, 0.98));
+        backdrop-filter: blur(10px);
+        overflow: hidden;
         border: 1px solid var(--line);
         box-shadow: var(--shadow);
       }}
-      .workspace {{ padding: 32px; }}
+      .hero-copy {{
+        position: relative;
+        min-height: 100%;
+      }}
+      .hero-copy::before,
+      .hero-rail::before {{
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), var(--accent-grid) calc(100% - 1px)),
+          linear-gradient(180deg, transparent 0, transparent calc(100% - 1px), var(--accent-grid) calc(100% - 1px));
+        background-size: 28px 28px;
+        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.28), transparent 78%);
+        pointer-events: none;
+      }}
+      .hero-copy-inner,
+      .hero-rail,
+      .workspace,
+      .sidebar,
+      .knowledge-panel {{
+        position: relative;
+        z-index: 1;
+      }}
+      .hero-copy-inner {{
+        padding: 34px;
+      }}
+      .workspace {{
+        padding: 30px;
+      }}
       .sidebar {{
         position: sticky;
         top: 20px;
         padding: 22px;
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(245, 236, 223, 0.95));
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(244, 237, 226, 0.95));
       }}
       .eyebrow {{
         display: inline-flex;
-        padding: 6px 12px;
+        padding: 7px 12px;
         border-radius: 999px;
         background: var(--accent-soft);
         color: var(--accent);
@@ -458,28 +550,43 @@ def _render_page(
       }}
       h1 {{
         margin: 18px 0 10px;
+        font-family: "Iowan Old Style", "Palatino Linotype", "Noto Serif KR", serif;
         font-size: clamp(42px, 7vw, 68px);
-        line-height: 0.94;
+        line-height: 0.98;
         letter-spacing: -0.05em;
-        max-width: 10ch;
+        max-width: 11ch;
       }}
       .lead {{
         margin: 0;
-        max-width: 58ch;
+        max-width: 60ch;
         color: var(--muted);
         font-size: 18px;
+        line-height: 1.6;
       }}
-      .stats {{
+      .hero-note-grid {{
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
+        grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+        gap: 18px;
         margin-top: 26px;
       }}
       .stat-card {{
-        min-height: 162px;
-        padding: 20px;
+        min-height: 178px;
+        padding: 24px;
+        border-radius: var(--radius-lg);
         border: 1px solid var(--line);
-        background: linear-gradient(180deg, white, var(--panel-strong));
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), var(--panel-muted));
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }}
+      .stat-card:hover,
+      .panel-block:hover,
+      .sample-card:hover {{
+        transform: translateY(-3px);
+        box-shadow: 0 16px 40px rgba(26, 29, 37, 0.10);
+      }}
+      .stat-card-primary {{
+        background:
+          radial-gradient(circle at top right, rgba(32, 87, 214, 0.16), transparent 28%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(235, 241, 255, 0.92));
       }}
       .stat-card strong {{
         display: block;
@@ -487,31 +594,122 @@ def _render_page(
         font-size: clamp(28px, 5vw, 36px);
         line-height: 1;
       }}
-      .stat-card p {{ margin: 0; color: var(--muted); }}
+      .stat-card p {{
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }}
       .flash {{
         margin-top: 18px;
         padding: 14px 16px;
+        border-radius: var(--radius-md);
         border: 1px solid #e5b5a7;
         background: #fff0ea;
         font-weight: 600;
       }}
+      .hero-rail {{
+        position: relative;
+        padding: 28px;
+        background:
+          radial-gradient(circle at top right, rgba(32, 87, 214, 0.18), transparent 24%),
+          linear-gradient(180deg, rgba(247, 250, 255, 0.98), rgba(240, 233, 223, 0.98));
+      }}
+      .rail-top,
+      .section-header,
+      .block-head,
+      .role-toolbar {{
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }}
+      .section-tag,
+      .block-eyebrow {{
+        margin: 0 0 8px;
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }}
+      h2,
+      h3 {{
+        font-family: "Iowan Old Style", "Palatino Linotype", "Noto Serif KR", serif;
+      }}
+      html[lang="ko"] h1,
+      html[lang="ko"] h2,
+      html[lang="ko"] h3 {{
+        font-family: "SUIT", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+        letter-spacing: -0.04em;
+        word-break: keep-all;
+      }}
+      html[lang="ko"] h1 {{
+        font-size: clamp(38px, 6.4vw, 60px);
+        line-height: 1.12;
+        max-width: 8.5ch;
+      }}
+      html[lang="ko"] .lead,
+      html[lang="ko"] .rail-body,
+      html[lang="ko"] .section-body,
+      html[lang="ko"] .block-body,
+      html[lang="ko"] .note-card p {{
+        word-break: keep-all;
+      }}
+      .hero-rail h2,
+      .section-header h2 {{
+        margin: 0;
+        font-size: clamp(28px, 4vw, 36px);
+        line-height: 1.08;
+      }}
+      .section-body,
+      .rail-body,
+      .block-body {{
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }}
+      .metric-pill {{
+        display: grid;
+        min-width: 92px;
+        padding: 12px 14px;
+        border-radius: 18px;
+        border: 1px solid rgba(32, 87, 214, 0.18);
+        background: rgba(255, 255, 255, 0.78);
+        text-align: right;
+      }}
+      .metric-pill strong {{
+        font-size: 28px;
+        line-height: 1;
+      }}
+      .metric-pill span {{
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }}
+      .hero-actions {{
+        margin-top: 20px;
+      }}
       form {{
         display: grid;
-        gap: 18px;
-        margin-top: 28px;
+        gap: 16px;
+        margin-top: 24px;
       }}
       .panel-block {{
-        padding: 18px;
+        padding: 22px;
+        border-radius: var(--radius-lg);
         border: 1px solid var(--line);
-        background: linear-gradient(180deg, #fffdf9, #f6eee2);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 237, 226, 0.92));
+        transition: transform 180ms ease, box-shadow 180ms ease;
       }}
-      .panel-block h2 {{
-        margin: 0 0 8px;
-        font-size: 18px;
+      .block-title {{
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.15;
       }}
-      .panel-block p {{
-        margin: 0 0 10px;
-        color: var(--muted);
+      .block-head {{
+        margin-bottom: 16px;
       }}
       label {{
         display: grid;
@@ -520,12 +718,23 @@ def _render_page(
       }}
       input[type=file], input[type=number], input[type=text], input[type=color] {{
         width: 100%;
-        padding: 12px;
+        padding: 13px 14px;
+        border-radius: 16px;
         border: 1px solid var(--line);
-        background: white;
+        background: rgba(255, 255, 255, 0.96);
         font: inherit;
       }}
-      input[type=color] {{ min-height: 48px; }}
+      input[type=file]:focus,
+      input[type=number]:focus,
+      input[type=text]:focus,
+      input[type=color]:focus {{
+        outline: 2px solid rgba(32, 87, 214, 0.14);
+        border-color: rgba(32, 87, 214, 0.32);
+      }}
+      input[type=color] {{
+        min-height: 52px;
+        padding: 8px;
+      }}
       .split {{
         display: grid;
         grid-template-columns: minmax(0, 1fr) 240px;
@@ -542,8 +751,9 @@ def _render_page(
       }}
       .hint {{
         padding: 14px 16px;
+        border-radius: 16px;
         border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.74);
+        background: rgba(255, 255, 255, 0.82);
       }}
       .hint strong {{
         display: block;
@@ -559,34 +769,32 @@ def _render_page(
         gap: 12px;
       }}
       button {{
-        padding: 14px 18px;
+        padding: 14px 20px;
+        border-radius: 16px;
         border: 0;
-        background: var(--accent);
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
         color: white;
         font-weight: 700;
         cursor: pointer;
-        transition: transform 120ms ease, box-shadow 120ms ease;
+        transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
       }}
       .button-secondary {{
-        background: white;
+        background: rgba(255, 255, 255, 0.95);
         color: var(--ink);
         border: 1px solid var(--line);
       }}
       button:hover {{
-        transform: translateY(-1px);
-        box-shadow: 0 10px 24px rgba(20, 89, 217, 0.24);
+        transform: translateY(-2px);
+        filter: saturate(1.06);
+        box-shadow: 0 14px 28px rgba(20, 89, 217, 0.24);
       }}
       .button-secondary:hover {{
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
       }}
-      .role-toolbar {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
+      .role-note {{
+        color: var(--muted);
+        font-size: 13px;
       }}
-      .role-note {{ color: var(--muted); font-size: 13px; }}
       .role-settings {{
         display: grid;
         gap: 12px;
@@ -595,8 +803,9 @@ def _render_page(
         display: grid;
         gap: 10px;
         padding: 16px;
+        border-radius: 18px;
         border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.52);
+        background: rgba(255, 255, 255, 0.76);
       }}
       .role-row-title {{
         display: block;
@@ -629,19 +838,22 @@ def _render_page(
       }}
       .help {{
         padding: 18px;
+        border-radius: var(--radius-lg);
         border: 1px solid var(--line);
-        background: linear-gradient(180deg, #fffdf9, #f6eee2);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 237, 226, 0.92));
       }}
       .help + .help {{
         margin-top: 16px;
       }}
       .help h2 {{
         margin: 0 0 10px;
-        font-size: 18px;
+        font-size: 22px;
+        line-height: 1.18;
       }}
       .help p {{
         margin: 0 0 10px;
         color: var(--muted);
+        line-height: 1.6;
       }}
       .help ul {{
         margin: 0;
@@ -663,11 +875,20 @@ def _render_page(
         align-items: center;
         justify-content: center;
         padding: 11px 16px;
+        border-radius: 14px;
         border: 1px solid var(--line);
-        background: white;
+        background: rgba(255, 255, 255, 0.92);
         color: var(--ink);
         text-decoration: none;
         font-weight: 700;
+        transition: transform 140ms ease, box-shadow 140ms ease;
+      }}
+      .action-link:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 10px 18px rgba(26, 29, 37, 0.08);
+      }}
+      .table-shell {{
+        overflow-x: auto;
       }}
       .schema-table {{
         width: 100%;
@@ -695,15 +916,29 @@ def _render_page(
         margin-top: 14px;
         justify-items: center;
       }}
+      .hero-examples {{
+        margin-top: 18px;
+      }}
       .sample-card {{
         position: relative;
         width: min(100%, 220px);
         aspect-ratio: 93 / 122;
         min-height: unset;
         padding: 18px 16px 16px;
-        border: 1px solid #b9b1a3;
+        border-radius: 26px;
+        border: 1px solid rgba(26, 29, 37, 0.14);
         background: linear-gradient(180deg, #fffefb, #f6f1e8);
         overflow: hidden;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.54);
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }}
+      .sample-card::before {{
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border-radius: 18px;
+        border: 1px solid rgba(26, 29, 37, 0.08);
+        pointer-events: none;
       }}
       .sample-card.no-role {{
         aspect-ratio: 93 / 122;
@@ -715,19 +950,23 @@ def _render_page(
         font-weight: 700;
         text-align: center;
         letter-spacing: -0.03em;
+        position: relative;
+        z-index: 1;
       }}
       .sample-card .meta {{
         margin-top: 14px;
         text-align: center;
         line-height: 1.25;
         font-size: 13px;
+        position: relative;
+        z-index: 1;
       }}
       .sample-card .bar {{
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
-        padding: 10px 8px;
+        padding: 12px 8px;
         text-align: center;
         color: white;
         font-size: 16px;
@@ -744,11 +983,74 @@ def _render_page(
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
+        position: relative;
+        z-index: 1;
       }}
       p {{ line-height: 1.5; }}
-      @media (max-width: 1020px) {{
-        .shell {{ grid-template-columns: 1fr; }}
+      .note-strip {{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }}
+      .note-card {{
+        padding: 18px 20px;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.76);
+        box-shadow: 0 12px 28px rgba(26, 29, 37, 0.06);
+      }}
+      .note-card strong {{
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }}
+      .note-card p {{
+        margin: 0;
+        color: var(--muted);
+      }}
+      @keyframes rise-in {{
+        from {{
+          opacity: 0;
+          transform: translateY(12px);
+        }}
+        to {{
+          opacity: 1;
+          transform: translateY(0);
+        }}
+      }}
+      .hero-copy,
+      .hero-rail,
+      .workspace,
+      .sidebar,
+      .note-strip {{
+        animation: rise-in 420ms ease both;
+      }}
+      .hero-rail {{
+        animation-delay: 80ms;
+      }}
+      .sidebar {{
+        animation-delay: 120ms;
+      }}
+      .note-strip {{
+        animation-delay: 160ms;
+      }}
+      @media (max-width: 1100px) {{
+        .hero-shell,
+        .shell {{
+          grid-template-columns: 1fr;
+        }}
         .sidebar {{ position: static; }}
+      }}
+      @media (max-width: 900px) {{
+        .hero-note-grid,
+        .split {{
+          grid-template-columns: 1fr;
+        }}
       }}
       @media (max-width: 860px) {{
         .role-fields {{
@@ -757,109 +1059,144 @@ def _render_page(
       }}
       @media (max-width: 760px) {{
         main {{ padding: 16px; }}
-        .workspace, .sidebar {{ padding: 20px; }}
-        .stats, .grid, .split {{ grid-template-columns: 1fr; }}
-      }}
-      .knowledge-grid {{
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 24px;
-        margin-top: 24px;
-      }}
-      .knowledge-panel {{
-        padding: 24px;
-      }}
-      .knowledge-panel h2 {{
-        margin: 0 0 10px;
-        font-size: 24px;
-      }}
-      .knowledge-panel p {{
-        margin: 0;
-        color: var(--muted);
-      }}
-      .step-list {{
-        margin: 18px 0 0;
-        padding-left: 20px;
-      }}
-      .step-item + .step-item {{
-        margin-top: 14px;
-      }}
-      .step-item strong {{
-        display: block;
-        margin-bottom: 6px;
-      }}
-      .step-item p {{
-        margin: 0;
-      }}
-      .faq-list {{
-        display: grid;
-        gap: 16px;
-        margin-top: 18px;
-      }}
-      .faq-item {{
-        padding: 16px;
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.6);
-      }}
-      .faq-item h3 {{
-        margin: 0 0 8px;
-        font-size: 18px;
-      }}
-      .faq-item p {{
-        margin: 0;
-      }}
-      @media (max-width: 1020px) {{
-        .knowledge-grid {{ grid-template-columns: 1fr; }}
+        .hero-copy-inner,
+        .workspace,
+        .sidebar,
+        .hero-rail,
+        .note-card {{
+          padding: 20px;
+        }}
+        .grid,
+        .examples {{
+          grid-template-columns: 1fr;
+        }}
+        .note-strip {{
+          grid-template-columns: 1fr;
+        }}
+        .masthead,
+        .section-header,
+        .block-head,
+        .rail-top,
+        .role-toolbar {{
+          flex-direction: column;
+        }}
+        .metric-pill {{
+          text-align: left;
+        }}
       }}
     </style>
   </head>
   <body>
     <main>
-      <div class="topbar">
+      <header class="masthead">
+        <div class="brand-lockup">
+          <span class="brand-mark">NG</span>
+          <div class="brand-copy">
+            <strong>{_escape(copy["site_name"])}</strong>
+            <span>{_escape(copy["eyebrow"])}</span>
+          </div>
+        </div>
         <div class="lang-switch" aria-label="{_escape(copy["language_label"])}">
           {_language_toggle_html(language)}
         </div>
-      </div>
-      <div class="shell">
-        <section class="panel workspace">
-          <span class="eyebrow">{_escape(copy["eyebrow"])}</span>
-          <h1>{_escape(copy["hero_title"])}</h1>
-          <p class="lead">{_escape(copy["lead"])}</p>
-          <div class="stats">
-            <div class="stat-card">
-              <strong>{_escape(copy["stats"][0]["title"])}</strong>
-              <p>{_escape(copy["stats"][0]["body"])}</p>
+      </header>
+      <section class="hero-shell">
+        <section class="panel hero-copy">
+          <div class="hero-copy-inner">
+            <span class="eyebrow">{_escape(copy["eyebrow"])}</span>
+            <h1>{_escape(copy["hero_title"])}</h1>
+            <p class="lead">{_escape(copy["lead"])}</p>
+            <div class="hero-note-grid">
+              <article class="stat-card stat-card-primary">
+                <strong>{_escape(copy["stats"][0]["title"])}</strong>
+                <p>{_escape(copy["stats"][0]["body"])}</p>
+              </article>
+              <article class="stat-card">
+                <strong>{_escape(copy["stats"][1]["title"])}</strong>
+                <p>{_escape(copy["stats"][1]["body"])}</p>
+                <div class="hint-grid" style="margin-top:16px;">
+                  {_workflow_hints_html(copy)}
+                </div>
+              </article>
             </div>
-            <div class="stat-card">
-              <strong>{_escape(copy["stats"][1]["title"])}</strong>
-              <p>{_escape(copy["stats"][1]["body"])}</p>
+            {message_html}
+          </div>
+        </section>
+        <aside class="panel hero-rail">
+          <div class="rail-top">
+            <div>
+              <p class="section-tag">{_escape(copy["rail_title"])}</p>
+              <h2>{_escape(copy["preview_section_title"])}</h2>
+            </div>
+            <div class="metric-pill">
+              <strong data-role-count aria-live="polite">{len(normalized_role_rows)}</strong>
+              <span>{_escape(copy["role_settings_title"])}</span>
             </div>
           </div>
-          {message_html}
+          <p class="rail-body">{_escape(copy["rail_body"])}</p>
+          <div class="examples hero-examples">{_sample_cards_html(copy, normalized_role_rows)}</div>
+          <div class="actions hero-actions">
+            <a class="action-link" href="/sample-workbook">{_escape(copy["download_workbook"])}</a>
+            <a class="action-link" href="/sample-pdf">{_escape(copy["download_pdf"])}</a>
+          </div>
+        </aside>
+      </section>
+      <div class="shell">
+        <section class="panel workspace">
+          <div class="section-header">
+            <div>
+              <p class="section-tag">{_escape(copy["workflow_title"])}</p>
+              <h2>{_escape(copy["generate_button"])}</h2>
+            </div>
+            <p class="section-body">{_escape(copy["workflow_body"])}</p>
+          </div>
           <form action="/generate" method="post" enctype="multipart/form-data">
             <input type="hidden" name="lang" value="{_escape(language)}" />
-            <div class="split">
-              <label>
-                {_escape(copy["workbook_label"])}
-                <input type="file" name="workbook" accept=".xlsx" required />
-              </label>
-              <div class="hint-grid">
-                {_workflow_hints_html(copy)}
-              </div>
-            </div>
-            <div class="grid">
-              <label>
-                {_escape(copy["card_width_label"])}
-                <input type="number" step="0.1" name="card_width_mm" value="93" required />
-              </label>
-              <label>
-                {_escape(copy["card_height_label"])}
-                <input type="number" step="0.1" name="card_height_mm" value="122" required />
-              </label>
-            </div>
             <section class="panel-block">
-              <h2>{_escape(copy["role_settings_title"])}</h2>
-              <p>{_escape(copy["role_settings_body"])}</p>
+              <div class="block-head">
+                <div>
+                  <p class="block-eyebrow">{_escape(copy["upload_section_title"])}</p>
+                  <h3 class="block-title">{_escape(copy["workbook_label"])}</h3>
+                </div>
+                <p class="block-body">{_escape(copy["upload_section_body"])}</p>
+              </div>
+              <div class="split">
+                <label>
+                  {_escape(copy["workbook_label"])}
+                  <input type="file" name="workbook" accept=".xlsx" required />
+                </label>
+                <div class="hint-grid">
+                  {_workflow_hints_html(copy)}
+                </div>
+              </div>
+            </section>
+            <section class="panel-block">
+              <div class="block-head">
+                <div>
+                  <p class="block-eyebrow">{_escape(copy["size_section_title"])}</p>
+                  <h3 class="block-title">{_escape(copy["stats"][0]["title"])}</h3>
+                </div>
+                <p class="block-body">{_escape(copy["size_section_body"])}</p>
+              </div>
+              <div class="grid">
+                <label>
+                  {_escape(copy["card_width_label"])}
+                  <input type="number" step="0.1" name="card_width_mm" value="93" required />
+                </label>
+                <label>
+                  {_escape(copy["card_height_label"])}
+                  <input type="number" step="0.1" name="card_height_mm" value="122" required />
+                </label>
+              </div>
+            </section>
+            <section class="panel-block">
+              <div class="block-head">
+                <div>
+                  <p class="block-eyebrow">{_escape(copy["role_section_title"])}</p>
+                  <h3 class="block-title">{_escape(copy["role_settings_title"])}</h3>
+                </div>
+                <p class="block-body">{_escape(copy["role_settings_body"])}</p>
+              </div>
               <div class="role-toolbar">
                 <span class="role-note">{_escape(copy["max_roles_note"])}</span>
                 <button type="button" class="button-secondary" id="add-role-button">{_escape(copy["add_role_button"])}</button>
@@ -868,36 +1205,38 @@ def _render_page(
                 {_role_settings_html(copy, normalized_role_rows)}
               </div>
             </section>
-            <div class="button-row">
-              <button type="button" class="button-secondary" id="preview-button">{_escape(copy["preview_button"])}</button>
-              <button type="submit">{_escape(copy["generate_button"])}</button>
-            </div>
+            <section class="panel-block">
+              <div class="block-head">
+                <div>
+                  <p class="block-eyebrow">{_escape(copy["action_section_title"])}</p>
+                  <h3 class="block-title">{_escape(copy["generate_button"])}</h3>
+                </div>
+                <p class="block-body">{_escape(copy["action_section_body"])}</p>
+              </div>
+              <div class="button-row">
+                <button type="button" class="button-secondary" id="preview-button">{_escape(copy["preview_button"])}</button>
+                <button type="submit">{_escape(copy["generate_button"])}</button>
+              </div>
+            </section>
           </form>
         </section>
         <aside class="panel sidebar">
           <section class="help">
             <h2>{_escape(copy["sample_section_title"])}</h2>
             <p>{_escape(copy["sample_section_body"])}</p>
-            <div class="actions">
-              <a class="action-link" href="/sample-workbook">{_escape(copy["download_workbook"])}</a>
-              <a class="action-link" href="/sample-pdf">{_escape(copy["download_pdf"])}</a>
+            <div class="table-shell">
+              <table class="schema-table">
+                <thead>
+                  <tr>
+                    <th>{_escape(copy["sample_table_headers"][0])}</th>
+                    <th>{_escape(copy["sample_table_headers"][1])}</th>
+                    <th>{_escape(copy["sample_table_headers"][2])}</th>
+                    <th>{_escape(copy["sample_table_headers"][3])}</th>
+                  </tr>
+                </thead>
+                <tbody>{_table_rows_html(copy)}</tbody>
+              </table>
             </div>
-            <table class="schema-table">
-              <thead>
-                <tr>
-                  <th>{_escape(copy["sample_table_headers"][0])}</th>
-                  <th>{_escape(copy["sample_table_headers"][1])}</th>
-                  <th>{_escape(copy["sample_table_headers"][2])}</th>
-                  <th>{_escape(copy["sample_table_headers"][3])}</th>
-                </tr>
-              </thead>
-              <tbody>{_table_rows_html(copy)}</tbody>
-            </table>
-          </section>
-          <section class="help">
-            <h2>{_escape(copy["preview_section_title"])}</h2>
-            <p>{_escape(copy["preview_section_body"])}</p>
-            <div class="examples">{_sample_cards_html(copy, normalized_role_rows)}</div>
           </section>
           <section class="help">
             <h2>{_escape(copy["guide_title"])}</h2>
@@ -905,21 +1244,8 @@ def _render_page(
           </section>
         </aside>
       </div>
-      <section class="knowledge-grid" aria-label="Search and answer content">
-        <section class="panel knowledge-panel">
-          <h2>{_escape(copy["search_section_title"])}</h2>
-          <p>{_escape(copy["search_section_body"])}</p>
-          <div class="help" style="margin-top:18px;">
-            <h2>{_escape(copy["howto_title"])}</h2>
-            <p>{_escape(copy["howto_intro"])}</p>
-            <ol class="step-list">{_howto_steps_html(copy)}</ol>
-          </div>
-        </section>
-        <section class="panel knowledge-panel">
-          <h2>{_escape(copy["faq_title"])}</h2>
-          <p>{_escape(copy["faq_intro"])}</p>
-          <div class="faq-list">{_faq_items_html(copy)}</div>
-        </section>
+      <section class="note-strip" aria-label="{_escape(copy["quick_notes_title"])}">
+        {_quick_notes_html(copy)}
       </section>
     </main>
     <script>
@@ -929,6 +1255,7 @@ def _render_page(
       const roleSettings = document.querySelector('.role-settings');
       const addRoleButton = document.getElementById('add-role-button');
       const exampleContainer = document.querySelector('.examples');
+      const roleCountIndicators = document.querySelectorAll('[data-role-count]');
       const maxRoleRows = {MAX_ROLE_ROWS};
       const minRoleRows = {MIN_ROLE_ROWS};
       const initialRoleRows = {initial_role_rows};
@@ -1017,6 +1344,9 @@ def _render_page(
         if (addRoleButton) {{
           addRoleButton.disabled = rows.length >= maxRoleRows;
         }}
+        roleCountIndicators.forEach((indicator) => {{
+          indicator.textContent = String(rows.length);
+        }});
         renderExampleCards();
       }}
 

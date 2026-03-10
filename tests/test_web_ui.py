@@ -22,8 +22,8 @@ def test_home_page_shows_schema_and_preview_help() -> None:
     assert 'type="application/ld+json"' in body
     assert "FAQPage" in body
     assert "SoftwareApplication" in body
-    assert "How to make print-ready name tags" in body
-    assert "Create printable event name tags from Excel" in body
+    assert "Need to know" in body
+    assert "Production workflow" in body
     assert "Sample workbook columns" in body
     assert "Role examples" in body
     assert "Set to 93 × 122 mm by default, and easy to adjust. Print at 100% for a true-to-size fit." in body
@@ -47,10 +47,10 @@ def test_korean_language_toggle_renders_full_page_copy() -> None:
     body = response.text
     assert "<title>Nametag Generator | 엑셀로 출력용 행사 네임태그 PDF 만들기</title>" in body
     assert '<link rel="canonical" href="http://testserver/ko"' in body
-    assert "자주 묻는 질문" in body
-    assert "출력용 네임태그 만드는 방법" in body
-    assert "한 번에 맞는 네임태그를 바로 만드세요." in body
-    assert "기본값은 93 × 122 mm이며 필요하면 조정할 수 있습니다. 100% 실제 사이즈로 출력하면 바로 사용할 수 있습니다." in body
+    assert "빠른 안내" in body
+    assert "작업 흐름" in body
+    assert "행사 네임태그를 깔끔하게 바로 만드세요." in body
+    assert "기본 규격은 93 × 122 mm입니다. 필요하면 수정하고, 출력할 때는 100% 실제 크기로 맞춰 주세요." in body
     assert "역할 바 설정" in body
     assert "브라우저에서 미리보기" in body
     assert 'href="/en"' in body
